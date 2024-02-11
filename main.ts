@@ -6,7 +6,8 @@ import {Arr} from "tern";
 export default class BreadcrumbPlugin extends Plugin {
 
 	async onload() {
-		const statusBarItem = this.addStatusBarItem();
+		// FIXME: fix this probably
+		const statusBarItem = this.app.workspace.activeEditor?.titleContainerEl
 		// FIXME? this seems tricky
 		//this.registerEvent(this.app.metadataCache.on("dataview:index-ready", () => {
 				this.registerEvent(this.app.workspace.on('file-open', async () => {
@@ -29,22 +30,28 @@ export default class BreadcrumbPlugin extends Plugin {
 								stack.push(inlink.path);
 							}
 						}
-						Array.from(pages).reverse().forEach(p => {
+						const toRender = Array.from(pages).reverse().concat(file.path)
+						let i = 0
+						toRender.forEach(p => {
 							const page = dv.page(p).file
 							const link = statusBarItem.createEl("a", {
 								cls: "internal-link 1",
 								href: page.path,
-								text: page.name,
+								text: `${page.name}`,
+
 							})
 							link.onClickEvent(async (evt: MouseEvent) => {
 								await openOrSwitch(page.path, evt)
 							})
-							statusBarItem.createEl("p", {
-								text: " > "
-							})
+							i += 1
+							if (i != toRender.length) {
+								statusBarItem.createEl("p", {
+									text: ">"
+								})
+							} else {
+								link.style.fontWeight = "bold"
+							}
 						})
-					} else {
-						console.log("failed to load")
 					}
 			//	}))
 			})
