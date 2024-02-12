@@ -1,16 +1,15 @@
 import {App, Editor, MarkdownView, Modal, Notice, Plugin, PluginSettingTab, Setting} from 'obsidian';
 import {getAPI, DataviewApi} from "obsidian-dataview";
-import { openOrSwitch } from 'obsidian-community-lib/dist/utils';
+import {openOrSwitch} from 'obsidian-community-lib/dist/utils';
 import {Arr} from "tern";
 
 export default class BreadcrumbPlugin extends Plugin {
 
 	async onload() {
-		// FIXME: fix this probably
-		const statusBarItem = this.app.workspace.activeEditor?.titleContainerEl
-		// FIXME? this seems tricky
-		//this.registerEvent(this.app.metadataCache.on("dataview:index-ready", () => {
-				this.registerEvent(this.app.workspace.on('file-open', async () => {
+		this.registerEvent(this.app.metadataCache.on("dataview:index-ready", () => {
+			// FIXME: fix this probably
+			const statusBarItem = this.app.workspace.activeEditor?.titleContainerEl
+			this.registerEvent(this.app.workspace.on('file-open', async () => {
 					statusBarItem.setText("")
 					const file = this.app.workspace.getActiveFile()
 					const dv = getAPI(this.app);
@@ -24,7 +23,7 @@ export default class BreadcrumbPlugin extends Plugin {
 							if (!meta) continue;
 
 							for (const inlink of meta.file.inlinks.array()) {
-								if (!inlink.path.contains("*") && !inlink.path.contains("!")) continue
+								if (!inlink.path.contains("+")) continue
 								if (pages.has(inlink.path)) continue;
 								pages.add(inlink.path);
 								stack.push(inlink.path);
@@ -53,7 +52,7 @@ export default class BreadcrumbPlugin extends Plugin {
 							}
 						})
 					}
-			//	}))
+				}))
 			})
 		)
 
